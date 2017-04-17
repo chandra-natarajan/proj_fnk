@@ -1,10 +1,10 @@
-'''Trains a simple deep NN on the MNIST dataset.
-Gets to 98.40% test accuracy after 20 epochs
-(there is *a lot* of margin for parameter tuning).
-2 seconds per epoch on a K520 GPU.
+# code adapted from
+# https://github.com/fchollet/keras/blob/master/examples/mnist_mlp.py
+'''
+Trains a simple Deep NN on the MNIST dataset.
+Gets to 98.4% test accuracy after 15 epochs
 
-Code from https://github.com/fchollet/keras/blob/master/examples/mnist_mlp.py
-
+1 seconds per epoch on a GTX 980 Ti GPU.
 '''
 
 from __future__ import print_function
@@ -13,8 +13,7 @@ import keras
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from keras.optimizers import RMSprop
-
+from keras.optimizers import Adadelta #, Adam, RMSprop, Nadam
 
 batch_size = 128
 num_classes = 10
@@ -23,12 +22,15 @@ epochs = 20
 # the data, shuffled and split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-x_train = x_train.reshape(60000, 784)
-x_test = x_test.reshape(10000, 784)
+img_rows, img_cols = x_train.shape[1], x_train.shape[2]
+
+x_train = x_train.reshape(x_train.shape[0], img_rows * img_cols)
+x_test = x_test.reshape(x_test.shape[0], img_rows * img_cols)
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_train /= 255
 x_test /= 255
+
 print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
 
@@ -46,7 +48,7 @@ model.add(Dense(10, activation='softmax'))
 model.summary()
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=RMSprop(),
+              optimizer=Adadelta(),
               metrics=['accuracy'])
 
 history = model.fit(x_train, y_train,
